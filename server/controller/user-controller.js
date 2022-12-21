@@ -1,16 +1,24 @@
-import User from "../model/user.js";
-import bcrypt from 'bcrypt';
+const User = require("../model/user.js");
+const bcrypt = require('bcrypt');
 
-const signUpUser = async (request, response) =>{
-    try {       
-        const hashedPassword = await bcrypt.hash(request.body.password, 10);
-        const user = {name: request.body.name, username: request.body.username, password: hashedPassword};
+const signUp = async (req, res) =>{
+    try {
+        const { name, username, password } = req.body;     
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const user = {name, username, password: hashedPassword};
         const newUser = new User(user);
-        await newUser.save();
-        return response.status(200).json({msg: 'signup successful'});
+        const userData = await newUser.save();
+        return res.status(200).json({
+            status: false,
+            msg: 'signup successful',
+            data: userData
+        });
     } catch (error) {
-        return response.status(500).json({msg: 'error while signup'});
+        return res.status(500).json({
+            status: false,
+            msg: 'Internal server error',
+        });
     }
 }
 
-export default signUpUser;
+module.exports = { signUp };
